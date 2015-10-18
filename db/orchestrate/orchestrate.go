@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"time"
 
 	goar "github.com/obieq/goar"
 	c "github.com/orchestrate-io/gorc"
@@ -12,8 +13,9 @@ import (
 
 type ArOrchestrate struct {
 	goar.ActiveRecord
-	ID string `json:"id,omitempty"`
-	goar.Timestamps
+	ID        string    `json:"id,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 // interface assertions
@@ -23,13 +25,6 @@ var _ goar.Persister = (*ArOrchestrate)(nil)
 var (
 	clients = map[string]*c.Client{}
 )
-
-var connectOpts = func() map[string]string {
-	opts := make(map[string]string)
-	opts["api_key"] = "7e839ed5-536c-405a-9d78-e18d0bbf6080"
-
-	return opts
-}
 
 func connect(connName string, env string) (client *c.Client) {
 	cfg := goar.Config
@@ -117,7 +112,8 @@ func (ar *ArOrchestrate) Find(id interface{}, out interface{}) error {
 func (ar *ArOrchestrate) DbSave() error {
 	var err error
 
-	if ar.UpdatedAt != nil {
+	// if ar.UpdatedAt != nil {
+	if ar.ID != "" {
 		_, err = ar.Client().Put(ar.ModelName(), ar.ID, ar.Self())
 	} else {
 		_, err = ar.Client().PutIfAbsent(ar.ModelName(), ar.ID, ar.Self())
