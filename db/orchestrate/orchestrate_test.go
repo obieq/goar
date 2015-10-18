@@ -76,7 +76,7 @@ var _ = Describe("Orchestrate", func() {
 				Ω(Sprite.Save()).Should(BeTrue())
 
 				// reset ID
-				Sprite.ID = ""
+				Sprite.CreatedAt = nil
 				success, err := Sprite.Save() // id is still the same, so save should fail
 				Ω(err).To(HaveOccurred())
 				Ω(success).Should(BeFalse())

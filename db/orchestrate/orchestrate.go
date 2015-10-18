@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"time"
 
 	goar "github.com/obieq/goar"
 	c "github.com/orchestrate-io/gorc"
@@ -13,9 +12,8 @@ import (
 
 type ArOrchestrate struct {
 	goar.ActiveRecord
-	ID        string    `json:"id,omitempty"`
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	ID string `json:"id,omitempty"`
+	goar.Timestamps
 }
 
 // interface assertions
@@ -112,8 +110,7 @@ func (ar *ArOrchestrate) Find(id interface{}, out interface{}) error {
 func (ar *ArOrchestrate) DbSave() error {
 	var err error
 
-	// if ar.UpdatedAt != nil {
-	if ar.ID != "" {
+	if ar.UpdatedAt != nil {
 		_, err = ar.Client().Put(ar.ModelName(), ar.ID, ar.Self())
 	} else {
 		_, err = ar.Client().PutIfAbsent(ar.ModelName(), ar.ID, ar.Self())
