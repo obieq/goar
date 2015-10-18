@@ -1,0 +1,33 @@
+{
+	"ImportPath": "github.com/obieq/goar/db/couchbase",
+	"GoVersion": "go1.4",
+	"Deps": [
+		{
+			"ImportPath": "github.com/couchbase/gomemcached",
+			"Rev": "3b1242bacb712122d0f2244ac5a806efac98b45c"
+		},
+		{
+			"ImportPath": "github.com/couchbaselabs/go-couchbase",
+			"Rev": "0632c5345de56b2b79d7b45437f665a77c82ba09"
+		},
+		{
+			"ImportPath": "github.com/gedex/inflector",
+			"Rev": "8c0e57904488c554ab26caec525db5c92b23f051"
+		},
+		{
+			"ImportPath": "github.com/joho/godotenv",
+			"Comment": "v1-2-gead2e75",
+			"Rev": "ead2e75027bf1a3f6457e28d9eb3c2fa05109d2b"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.1.0-41-g38caab9",
+			"Rev": "38caab951a9ff39f0e61294a1dbaaa074a39228b"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-28-g8adf9e1",
+			"Rev": "8adf9e1730c55cdc590de7d49766cb2acc88d8f2"
+		}
+	]
+}

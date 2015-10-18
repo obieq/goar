@@ -1,0 +1,43 @@
+{
+	"ImportPath": "github.com/obieq/goar/db/dynamodb",
+	"GoVersion": "go1.4",
+	"Deps": [
+		{
+			"ImportPath": "github.com/AdRoll/goamz/aws",
+			"Rev": "544704ceca9f065016d1cfdd5a1e4b230720f346"
+		},
+		{
+			"ImportPath": "github.com/AdRoll/goamz/dynamodb",
+			"Rev": "544704ceca9f065016d1cfdd5a1e4b230720f346"
+		},
+		{
+			"ImportPath": "github.com/bitly/go-simplejson",
+			"Comment": "v0.4.3-28-g3378bdc",
+			"Rev": "3378bdcb5cebedcbf8b5750edee28010f128fe24"
+		},
+		{
+			"ImportPath": "github.com/gedex/inflector",
+			"Rev": "8c0e57904488c554ab26caec525db5c92b23f051"
+		},
+		{
+			"ImportPath": "github.com/imdario/mergo",
+			"Comment": "0.1.3-10-g67b9c0a",
+			"Rev": "67b9c0a23d7ee9dcbcd44cd7ece4bf15ef6f4d26"
+		},
+		{
+			"ImportPath": "github.com/joho/godotenv",
+			"Comment": "v1-2-gead2e75",
+			"Rev": "ead2e75027bf1a3f6457e28d9eb3c2fa05109d2b"
+		},
+		{
+			"ImportPath": "github.com/onsi/ginkgo",
+			"Comment": "v1.1.0-41-g38caab9",
+			"Rev": "38caab951a9ff39f0e61294a1dbaaa074a39228b"
+		},
+		{
+			"ImportPath": "github.com/onsi/gomega",
+			"Comment": "v1.0-28-g8adf9e1",
+			"Rev": "8adf9e1730c55cdc590de7d49766cb2acc88d8f2"
+		}
+	]
+}
