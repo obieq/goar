@@ -8,6 +8,7 @@ import (
 
 	goar "github.com/obieq/goar"
 	c "github.com/orchestrate-io/gorc"
+	"github.com/satori/go.uuid"
 )
 
 type ArOrchestrate struct {
@@ -111,6 +112,9 @@ func (ar *ArOrchestrate) DbSave() error {
 	var err error
 
 	if ar.UpdatedAt != nil {
+		if ar.ID == "" {
+			ar.ID = uuid.NewV4().String()
+		}
 		_, err = ar.Client().Put(ar.ModelName(), ar.ID, ar.Self())
 	} else {
 		_, err = ar.Client().PutIfAbsent(ar.ModelName(), ar.ID, ar.Self())
