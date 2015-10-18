@@ -111,12 +111,12 @@ func (ar *ArOrchestrate) Find(id interface{}, out interface{}) error {
 func (ar *ArOrchestrate) DbSave() error {
 	var err error
 
-	if ar.UpdatedAt != nil {
+	if ar.UpdatedAt != nil { // existing instance (PUT/PATCH)
+		_, err = ar.Client().Put(ar.ModelName(), ar.ID, ar.Self())
+	} else { // new instance (POST)
 		if ar.ID == "" {
 			ar.ID = uuid.NewV4().String()
 		}
-		_, err = ar.Client().Put(ar.ModelName(), ar.ID, ar.Self())
-	} else {
 		_, err = ar.Client().PutIfAbsent(ar.ModelName(), ar.ID, ar.Self())
 	}
 
