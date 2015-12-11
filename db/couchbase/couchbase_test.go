@@ -69,6 +69,17 @@ var _ = Describe("Couchbase", func() {
 				Ω(model.ID).Should(Equal(ModelS.ID))
 			})
 
+			It("should create a model with an auto-generated id", func() {
+				ModelS.ID = ""
+				success, err := ModelS.Save()
+				Ω(success).Should(BeTrue())
+
+				model := Out
+				err = CouchbaseAutomobile{}.ToActiveRecord().Find(ModelS.ID, &model)
+				Ω(err).NotTo(HaveOccurred())
+				Ω(len(model.ID)).Should(Equal(36))
+			})
+
 			It("should not create a model using an existing id", func() {
 				Sprite.Delete()
 				Ω(Sprite.Save()).Should(BeTrue())

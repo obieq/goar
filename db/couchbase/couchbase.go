@@ -6,6 +6,7 @@ import (
 
 	goar "github.com/obieq/goar"
 	couchbase "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/gopkg.in/couchbaselabs/gocb.v1"
+	"github.com/satori/go.uuid"
 )
 
 type ArCouchbase struct {
@@ -93,7 +94,9 @@ func (ar *ArCouchbase) DbSave() error {
 	var cas couchbase.Cas
 
 	if ar.UpdatedAt == nil {
-		// added, err = client.Add(ar.ID, 0, ar.Self())
+		if ar.ID == "" { // auto-generate the document id if the client didn't provide one
+			ar.ID = uuid.NewV4().String()
+		}
 		cas, err = ar.Client().Insert(ar.ID, ar.Self(), 0)
 		if err == nil && cas == 0 {
 			err = errors.New("Insert Failed: key already exists")
