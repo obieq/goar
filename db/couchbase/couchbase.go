@@ -3,69 +3,69 @@ package couchbase
 import (
 	"errors"
 	"log"
-	"os"
-	"reflect"
 
-	couchbase "github.com/couchbaselabs/go-couchbase"
-	"github.com/joho/godotenv"
-	. "github.com/obieq/goar"
+	goar "github.com/obieq/goar"
+	couchbase "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/gopkg.in/couchbaselabs/gocb.v1"
 )
 
 type ArCouchbase struct {
-	ActiveRecord
+	goar.ActiveRecord
 	ID string `json:"id,omitempty"`
-	Timestamps
+	goar.Timestamps
 }
+
+// interface assertions
+// https://splice.com/blog/golang-verify-type-implements-interface-compile-time/
+var _ goar.Persister = (*ArCouchbase)(nil)
 
 var (
-	client *couchbase.Bucket
+	clients = map[string]*couchbase.Bucket{}
 )
 
-var connectOpts = func() map[string]string {
-	opts := make(map[string]string)
-
-	if envs, err := godotenv.Read(); err != nil {
-		log.Fatal("Error loading .env file: ", err)
-	} else {
-		opts["uri"] = os.Getenv(envs["COUCHBASE_URI"])
-		opts["port"] = os.Getenv(envs["COUCHBASE_PORT"])
-		opts["pool"] = os.Getenv(envs["COUCHBASE_POOL"])
-		opts["bucket_name"] = os.Getenv(envs["COUCHBASE_BUCKET_NAME"])
-		opts["bucket_password"] = os.Getenv(envs["COUCHBASE_BUCKET_PASSWORD"])
+func connect(connName string, env string) *couchbase.Bucket {
+	cfg := goar.Config
+	if cfg == nil {
+		log.Panicln("goar couchbase config cannot be nil")
 	}
 
-	return opts
-}
-
-func connect() *couchbase.Bucket {
-	opts := connectOpts()
-
-	if opts["uri"] == "" || opts["port"] == "" || opts["pool"] == "" || opts["bucket_name"] == "" {
-		log.Fatalf("at least one required option is missing: ", opts)
+	connKey := env + "_couchbase_" + connName
+	m, found := cfg.CouchbaseDBs[connKey]
+	if !found {
+		log.Panicln("couchbase db connection not found:", connKey)
+	} else if m.ClusterAddress == "" {
+		log.Panicln("couchbase cluster address cannot be blank")
+	} else if m.BucketName == "" {
+		log.Panicln("couchbase bucket name cannot be blank")
+	} else if m.BucketPassword == "" {
+		log.Println("---- WARNING --- bucket password is blank")
 	}
 
-	// NOTE: format of connection endpoint for a password protected bucket
-	//       bucket, err := couchbase.GetBucket("http://bucketname:bucketpass@myserver:8091/", "default", "bucket")
-	bucketPassword := ""
-	if opts["bucket_password"] != "" {
-		bucketPassword = opts["bucket_name"] + ":" + opts["couchbase_buckect_password"] + "@"
-	}
-	endpoint := "http://" + bucketPassword + opts["uri"] + ":" + opts["port"] + "/"
-	bucket, err := couchbase.GetBucket(endpoint, opts["pool"], opts["bucket_name"])
+	cluster, _ := couchbase.Connect("couchbase://" + m.ClusterAddress + "/")
+	bucket, err := cluster.OpenBucket(m.BucketName, m.BucketPassword)
 
 	if err != nil {
 		log.Fatalf("Error getting bucket:  %v", err)
 	}
 
+	// bucket.SetTranscoder(TestTranscoder{})
+
 	return bucket
 }
 
-func init() {
-	client = connect()
-}
+func (ar *ArCouchbase) Client() *couchbase.Bucket {
+	self := ar.Self()
+	connectionKey := self.DBConnectionName() + "_" + self.DBConnectionEnvironment()
+	if self == nil {
+		log.Panic("couchbase ar.Self() cannot be blank!")
+	}
 
-func Client() *couchbase.Bucket {
-	return client
+	conn, found := clients[connectionKey]
+	if !found {
+		conn = connect(self.DBConnectionName(), self.DBConnectionEnvironment())
+		clients[connectionKey] = conn
+	}
+
+	return conn
 }
 
 func (ar *ArCouchbase) SetKey(key string) {
@@ -78,47 +78,37 @@ func (ar *ArCouchbase) All(models interface{}, opts map[string]interface{}) (err
 
 func (ar *ArCouchbase) Truncate() (numRowsDeleted int, err error) {
 	// http://docs.couchbase.com/admin/admin/REST/rest-bucket-flush.html
-	return -1, errors.New("Truncate method not yet implemented")
+	err = ar.Client().Manager("user-name", "password").Flush()
+	log.Fatal("couchbase.Truncate() failed with error: ", err)
+	return -1, err
 }
 
-func (ar *ArCouchbase) Find(key interface{}) (interface{}, error) {
-	self := ar.Self()
-	modelVal := reflect.ValueOf(self).Elem()
-	modelInterface := reflect.New(modelVal.Type()).Interface()
-
-	err := client.Get(key.(string), modelInterface)
-
-	// if there's no document found, then the modelInterface instance will be empty/nil for all properties
-	// NOTE: given that the model is "generic" at this point, we need to use reflection in order to verify
-	// TODO: is there a better, more efficient way to verify?  is there some way to leverage the couchbase sdk?
-	if reflect.ValueOf(modelInterface).Elem().FieldByName("ID").String() == "" {
-		modelInterface = nil
-	}
-
-	return modelInterface, err
+func (ar *ArCouchbase) Find(id interface{}, out interface{}) error {
+	_, err := ar.Client().Get(id.(string), &out)
+	return err
 }
 
 func (ar *ArCouchbase) DbSave() error {
-	// client.Set performs an upsert
-	// return client.Set(ar.ID, 0, ar.Self())
-
 	var err error
-	var added bool = false
+	var cas couchbase.Cas
 
 	if ar.UpdatedAt == nil {
-		added, err = client.Add(ar.ID, 0, ar.Self())
-		if err == nil && !added {
+		// added, err = client.Add(ar.ID, 0, ar.Self())
+		cas, err = ar.Client().Insert(ar.ID, ar.Self(), 0)
+		if err == nil && cas == 0 {
 			err = errors.New("Insert Failed: key already exists")
 		}
 	} else {
-		err = client.Set(ar.ID, 0, ar.Self())
+		// err = client.Set(ar.ID, 0, ar.Self())
+		cas, err = ar.Client().Replace(ar.ID, ar.Self(), 0, 0)
 	}
 
 	return err
 }
 
 func (ar *ArCouchbase) DbDelete() (err error) {
-	return client.Delete(ar.ID)
+	_, err = ar.Client().Remove(ar.ID, 0)
+	return err
 }
 
 func (ar *ArCouchbase) DbSearch(models interface{}) (err error) {

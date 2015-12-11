@@ -2,25 +2,26 @@ package couchbase_test
 
 import (
 	. "github.com/obieq/goar"
-	. "github.com/obieq/goar/db/couchbase"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
 	. "github.com/obieq/goar/tests/models"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Couchbase", func() {
 	var (
-		ModelS, MK, Sprite, Panamera, Evoque, Bugatti CouchbaseAutomobile
-		ar                                            *CouchbaseAutomobile
+		ModelS, MK, Sprite, Panamera, Evoque, Bugatti, Out CouchbaseAutomobile
+		ar                                                 *CouchbaseAutomobile
 	)
 
 	BeforeEach(func() {
 		ar = CouchbaseAutomobile{}.ToActiveRecord()
-	})
-
-	It("should initialize client", func() {
-		client := Client()
-		Ω(client).ShouldNot(BeNil())
+		// delete instances from prior test
+		ids := []string{"id1", "id2", "id3"}
+		for idx := range ids {
+			ca := CouchbaseAutomobile{}.ToActiveRecord()
+			ca.SetKey(ids[idx])
+			ca.Delete()
+		}
 	})
 
 	Context("DB Interactions", func() {
@@ -59,12 +60,12 @@ var _ = Describe("Couchbase", func() {
 
 		Context("Persistance", func() {
 			It("should create a model and find it by id", func() {
-				success, _ := ModelS.Save()
+				success, err := ModelS.Save()
 				Ω(success).Should(BeTrue())
 
-				result, _ := CouchbaseAutomobile{}.ToActiveRecord().Find(ModelS.ID)
-				Ω(result).ShouldNot(BeNil())
-				model := result.(*CouchbaseAutomobile)
+				model := Out
+				err = CouchbaseAutomobile{}.ToActiveRecord().Find(ModelS.ID, &model)
+				Ω(err).NotTo(HaveOccurred())
 				Ω(model.ID).Should(Equal(ModelS.ID))
 			})
 
@@ -86,41 +87,45 @@ var _ = Describe("Couchbase", func() {
 				modelName := Sprite.Model
 
 				// create
-				result, _ := ar.Find(Sprite.ID)
-				Ω(result).ShouldNot(BeNil())
-				dbModel := result.(*CouchbaseAutomobile).ToActiveRecord()
-				Ω(dbModel.ID).Should(Equal(Sprite.ID))
-				Ω(dbModel.CreatedAt).ShouldNot(BeNil())
-				Ω(dbModel.UpdatedAt).Should(BeNil())
+				result := Out
+				err := ar.Find(Sprite.ID, &result)
+				Ω(err).NotTo(HaveOccurred())
+				Ω(result.ID).Should(Equal(Sprite.ID))
+				Ω(result.CreatedAt).ShouldNot(BeNil())
+				Ω(result.UpdatedAt).Should(BeNil())
 
 				// update
-				dbModel.Year += 1
+				dbModel := result.ToActiveRecord()
+				dbModel.Year++
 				dbModel.Model += " updated"
 				Ω(dbModel.Save()).Should(BeTrue())
 
 				// verify updates
-				result, err := ar.Find(Sprite.ID)
-				Expect(err).NotTo(HaveOccurred())
-				Ω(result).ShouldNot(BeNil())
-				Ω(dbModel.Year).Should(Equal(year + 1))
-				Ω(dbModel.Model).Should(Equal(modelName + " updated"))
-				Ω(dbModel.CreatedAt).ShouldNot(BeNil())
-				Ω(dbModel.UpdatedAt).ShouldNot(BeNil())
+				result = Out
+				err = ar.Find(Sprite.ID, &result)
+				Ω(err).NotTo(HaveOccurred())
+				Ω(result.Year).Should(Equal(year + 1))
+				Ω(result.Model).Should(Equal(modelName + " updated"))
+				Ω(result.CreatedAt).ShouldNot(BeNil())
+				Ω(result.UpdatedAt).ShouldNot(BeNil())
 			})
 
 			It("should delete an existing model", func() {
 				// create and verify
 				Ω(MK.Save()).Should(BeTrue())
-				result, _ := ar.Find(MK.ID)
-				Ω(result).ShouldNot(BeNil())
+				result := Out
+				err := ar.Find(MK.ID, &result)
+				Ω(err).NotTo(HaveOccurred())
 
 				// delete
-				err := MK.Delete()
+				err = MK.Delete()
 				Ω(err).NotTo(HaveOccurred())
 
 				// verify delete
-				result, _ = ar.Find(MK.ID)
-				Ω(result).Should(BeNil())
+				result = Out
+				err = ar.Find(MK.ID, &result)
+				Ω(err).To(HaveOccurred())
+				Ω(err.Error()).To(Equal("Key not found."))
 			})
 		})
 	})

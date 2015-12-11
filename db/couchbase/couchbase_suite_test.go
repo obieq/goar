@@ -5,9 +5,9 @@ import (
 
 	. "github.com/obieq/goar"
 	. "github.com/obieq/goar/db/couchbase"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
 	. "github.com/obieq/goar/tests/models"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 type CouchbaseAutomobile struct {
@@ -20,6 +20,14 @@ func (m *CouchbaseAutomobile) Validate() {
 	m.Validation.Required("Year", m.Year)
 	m.Validation.Required("Make", m.Make)
 	m.Validation.Required("Model", m.Model)
+}
+
+func (m *CouchbaseAutomobile) DBConnectionEnvironment() string {
+	return "test" // NOTE: when using the goar package, this value should be pulled from ENV or config file
+}
+
+func (m *CouchbaseAutomobile) DBConnectionName() string {
+	return "aws"
 }
 
 func (model CouchbaseAutomobile) ToActiveRecord() *CouchbaseAutomobile {
@@ -48,8 +56,8 @@ func (dbModel CouchbaseAutomobile) AssertDbPropertyMappings(model CouchbaseAutom
 
 var _ = BeforeSuite(func() {
 	// drop collections from previous tests
-	//_, err := CouchbaseAutomobile{}.ToActiveRecord().Truncate()
-	//Expect(err).NotTo(HaveOccurred())
+	// _, err := CouchbaseAutomobile{}.ToActiveRecord().Truncate()
+	// Expect(err).NotTo(HaveOccurred())
 
 	// delete instances from prior test
 	ids := []string{"id1", "id2", "id3"}

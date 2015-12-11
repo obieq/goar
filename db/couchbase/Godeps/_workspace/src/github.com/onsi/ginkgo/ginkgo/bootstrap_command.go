@@ -11,7 +11,7 @@ import (
 
 	"go/build"
 
-	"github.com/onsi/ginkgo/ginkgo/nodot"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/nodot"
 )
 
 func BuildBootstrapCommand() *Command {

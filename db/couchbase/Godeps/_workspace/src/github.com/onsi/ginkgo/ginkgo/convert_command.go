@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/onsi/ginkgo/ginkgo/convert"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/convert"
 	"os"
 )
 

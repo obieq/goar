@@ -11,6 +11,7 @@ const RETHINKDB = "rethinkdb"
 const POSTGRESQL = "postgresql"
 const DYNAMODB = "dynamodb"
 const ORCHESTRATE = "orchestrate"
+const COUCHBASE = "couchbase"
 
 var Config *config
 
@@ -28,6 +29,7 @@ type config struct {
 	PostgresqlDBs  map[string]*PostgresqlDBConfig
 	DynamoDBs      map[string]*DynamoDBConfig
 	OrchestrateDBs map[string]*OrchestrateConfig
+	CouchbaseDBs   map[string]*CouchbaseConfig
 }
 
 func newConfig() *config {
@@ -37,6 +39,7 @@ func newConfig() *config {
 	c.PostgresqlDBs = map[string]*PostgresqlDBConfig{}
 	c.DynamoDBs = map[string]*DynamoDBConfig{}
 	c.OrchestrateDBs = map[string]*OrchestrateConfig{}
+	c.CouchbaseDBs = map[string]*CouchbaseConfig{}
 
 	err := c.Load("goar", "config.json", true)
 
@@ -63,6 +66,9 @@ func newConfig() *config {
 
 	// parse orchestrate connections
 	c.loadOrchestrate()
+
+	// parse couchbase connections
+	c.loadCouchbase()
 
 	return c
 }

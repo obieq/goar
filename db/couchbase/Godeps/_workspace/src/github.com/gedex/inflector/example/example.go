@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/gedex/inflector"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/gedex/inflector"
 )
 
 var (

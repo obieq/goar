@@ -2,11 +2,11 @@ package format_test
 
 import (
 	"fmt"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega/format"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega/types"
 	"strings"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/format"
-	"github.com/onsi/gomega/types"
 )
 
 //recursive struct

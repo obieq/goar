@@ -3,19 +3,19 @@ package suite_test
 import (
 	"bytes"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/internal/suite"
-	. "github.com/onsi/gomega"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/suite"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
 
 	"math/rand"
 	"time"
 
-	"github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/internal/codelocation"
-	Failer "github.com/onsi/ginkgo/internal/failer"
-	Writer "github.com/onsi/ginkgo/internal/writer"
-	"github.com/onsi/ginkgo/reporters"
-	"github.com/onsi/ginkgo/types"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/config"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/codelocation"
+	Failer "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/failer"
+	Writer "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/writer"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/reporters"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/types"
 )
 
 var _ = Describe("Suite", func() {

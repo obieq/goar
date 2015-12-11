@@ -1,11 +1,11 @@
 package writer_test
 
 import (
-	"github.com/onsi/gomega/gbytes"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega/gbytes"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/internal/writer"
-	. "github.com/onsi/gomega"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/internal/writer"
+	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
 )
 
 var _ = Describe("Writer", func() {

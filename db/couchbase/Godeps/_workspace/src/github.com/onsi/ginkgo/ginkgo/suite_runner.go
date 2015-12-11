@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/onsi/ginkgo/config"
-	"github.com/onsi/ginkgo/ginkgo/interrupthandler"
-	"github.com/onsi/ginkgo/ginkgo/testrunner"
-	"github.com/onsi/ginkgo/ginkgo/testsuite"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/config"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/interrupthandler"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/testrunner"
+	"github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo/ginkgo/testsuite"
 )
 
 type SuiteRunner struct {
