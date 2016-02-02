@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 
+	gocb "github.com/couchbase/gocb"
 	goar "github.com/obieq/goar"
-	couchbase "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/gopkg.in/couchbaselabs/gocb.v1"
 	"github.com/satori/go.uuid"
 )
 
@@ -20,10 +20,10 @@ type ArCouchbase struct {
 var _ goar.Persister = (*ArCouchbase)(nil)
 
 var (
-	clients = map[string]*couchbase.Bucket{}
+	clients = map[string]*gocb.Bucket{}
 )
 
-func connect(connName string, env string) *couchbase.Bucket {
+func connect(connName string, env string) *gocb.Bucket {
 	cfg := goar.Config
 	if cfg == nil {
 		log.Panicln("goar couchbase config cannot be nil")
@@ -41,7 +41,7 @@ func connect(connName string, env string) *couchbase.Bucket {
 		log.Println("---- WARNING --- bucket password is blank")
 	}
 
-	cluster, _ := couchbase.Connect("couchbase://" + m.ClusterAddress + "/")
+	cluster, _ := gocb.Connect("couchbase://" + m.ClusterAddress + "/")
 	bucket, err := cluster.OpenBucket(m.BucketName, m.BucketPassword)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func connect(connName string, env string) *couchbase.Bucket {
 	return bucket
 }
 
-func (ar *ArCouchbase) Client() *couchbase.Bucket {
+func (ar *ArCouchbase) Client() *gocb.Bucket {
 	self := ar.Self()
 	connectionKey := self.DBConnectionName() + "_" + self.DBConnectionEnvironment()
 	if self == nil {
@@ -91,7 +91,7 @@ func (ar *ArCouchbase) Find(id interface{}, out interface{}) error {
 
 func (ar *ArCouchbase) DbSave() error {
 	var err error
-	var cas couchbase.Cas
+	var cas gocb.Cas
 
 	if ar.UpdatedAt == nil {
 		if ar.ID == "" { // auto-generate the document id if the client didn't provide one
@@ -116,6 +116,25 @@ func (ar *ArCouchbase) DbDelete() (err error) {
 
 func (ar *ArCouchbase) DbSearch(models interface{}) (err error) {
 	return errors.New("Search method not supported by Couchbase.  Create a View instead.")
+}
+
+func (ar *ArCouchbase) N1qlQuery(query string, models *[]interface{}) (err error) {
+	var rows gocb.ViewResults
+	n1qlQuery := gocb.NewN1qlQuery(query)
+	if rows, err = ar.Client().ExecuteN1qlQuery(n1qlQuery, nil); err != nil {
+		return err
+	}
+
+	var row interface{}
+	for rows.Next(&row) {
+		*models = append(*models, row)
+	}
+	if err := rows.Close(); err != nil {
+		log.Println("N1QL query error: %s\n", err)
+		return err
+	}
+
+	return err
 }
 
 //func processPlucks(query r.Term, ar *ArRethinkDb) r.Term {

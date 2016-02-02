@@ -1,6 +1,8 @@
 package couchbase_test
 
 import (
+	"log"
+
 	. "github.com/obieq/goar"
 	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/ginkgo"
 	. "github.com/obieq/goar/db/couchbase/Godeps/_workspace/src/github.com/onsi/gomega"
@@ -137,6 +139,21 @@ var _ = Describe("Couchbase", func() {
 				err = ar.Find(MK.ID, &result)
 				Ω(err).To(HaveOccurred())
 				Ω(err.Error()).To(Equal("Key not found."))
+			})
+		})
+
+		Context("Querying", func() {
+			It("should perform a N1QL Query", func() {
+				success, err := ModelS.Save()
+				Ω(success).Should(BeTrue())
+				success, err = MK.Save()
+				Ω(success).Should(BeTrue())
+				var results []interface{}
+
+				err = ar.N1qlQuery("SELECT * FROM default", &results)
+				log.Println(err)
+				Ω(err).NotTo(HaveOccurred())
+				Ω(len(results)).Should(BeNumerically(">=", 2))
 			})
 		})
 	})
