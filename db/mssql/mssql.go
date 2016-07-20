@@ -26,10 +26,10 @@ var _ Persister = (*ArMsSql)(nil)
 var _ RDBMSer = (*ArMsSql)(nil)
 
 var (
-	clients = map[string]xorm.Engine{}
+	clients = map[string]*xorm.Engine{}
 )
 
-func connect(connName string, env string) (client xorm.Engine) {
+func connect(connName string, env string) (client *xorm.Engine) {
 	c := Config
 	if c == nil {
 		log.Panic("goar config cannot be nil")
@@ -65,7 +65,7 @@ func connect(connName string, env string) (client xorm.Engine) {
 	}
 
 	//return connection
-	return *db
+	return db
 }
 
 func (ar *ArMsSql) SetKey(key string) {
@@ -73,7 +73,7 @@ func (ar *ArMsSql) SetKey(key string) {
 	//ar.ID = key
 }
 
-func (ar *ArMsSql) Client() xorm.Engine {
+func (ar *ArMsSql) Client() *xorm.Engine {
 	self := ar.Self()
 	connectionKey := self.DBConnectionName() + "_" + self.DBConnectionEnvironment()
 	if self == nil {
@@ -83,7 +83,7 @@ func (ar *ArMsSql) Client() xorm.Engine {
 	conn, found := clients[connectionKey]
 	if !found {
 		conn = connect(self.DBConnectionName(), self.DBConnectionEnvironment())
-		// clients[connectionKey] = conn
+		clients[connectionKey] = conn
 	}
 
 	return conn
