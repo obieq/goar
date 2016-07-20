@@ -52,7 +52,7 @@ type CustomModelNamer interface {
 }
 
 type Timestamps struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
+	CreatedAt *time.Time `xorm:"created" json:"created_at,omitempty"`
 	UpdatedAt *time.Time `xorm:"updated" json:"updated_at,omitempty"`
 }
 
