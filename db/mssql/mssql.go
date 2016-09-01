@@ -9,15 +9,15 @@ import (
 	"strings"
 
 	_ "github.com/denisenkom/go-mssqldb"
-	"github.com/jinzhu/gorm"
+	"github.com/go-xorm/xorm"
 	. "github.com/obieq/goar"
 )
 
 type ArMsSql struct {
-	ActiveRecord
-	ID int `gorm:"primary_key" json:"id,omitempty"`
+	ActiveRecord `xorm:"-"`
+	ID           int `xorm:"pk autoincr 'id'"`
 	//ID string `sql:"type:varchar(36)" gorm:"primary_key" json:"id,omitempty"`
-	Timestamps
+	Timestamps `xorm:"extends"`
 }
 
 // interface assertions
@@ -26,10 +26,10 @@ var _ Persister = (*ArMsSql)(nil)
 var _ RDBMSer = (*ArMsSql)(nil)
 
 var (
-	clients = map[string]gorm.DB{}
+	clients = map[string]*xorm.Engine{}
 )
 
-func connect(connName string, env string) (client gorm.DB) {
+func connect(connName string, env string) (client *xorm.Engine) {
 	c := Config
 	if c == nil {
 		log.Panic("goar config cannot be nil")
@@ -47,17 +47,17 @@ func connect(connName string, env string) (client gorm.DB) {
 		log.Println("connString:", connString)
 	}
 
-	db, err := gorm.Open("mssql", connString)
+	db, err := xorm.NewEngine("mssql", connString)
 	if err != nil {
 		log.Panic("Open mssql database failed:", err)
 	}
 
 	// set connection properties
-	db.DB().SetMaxIdleConns(m.MaxIdleConnections)
-	db.DB().SetMaxOpenConns(m.MaxOpenConnections)
+	db.SetMaxIdleConns(m.MaxIdleConnections)
+	db.SetMaxOpenConns(m.MaxOpenConnections)
 
 	// set log mode
-	db.LogMode(m.Debug)
+	db.ShowSQL(m.Debug)
 
 	// test the connection
 	if err = db.DB().Ping(); err != nil {
@@ -73,7 +73,7 @@ func (ar *ArMsSql) SetKey(key string) {
 	//ar.ID = key
 }
 
-func (ar *ArMsSql) Client() gorm.DB {
+func (ar *ArMsSql) Client() *xorm.Engine {
 	self := ar.Self()
 	connectionKey := self.DBConnectionName() + "_" + self.DBConnectionEnvironment()
 	if self == nil {
@@ -103,30 +103,46 @@ func (ar *ArMsSql) All(models interface{}, opts map[string]interface{}) (err err
 	}
 
 	client := ar.Client()
-	return client.Limit(limit).Find(models).Error
+	err = client.Find(models)
+
+	return err
 }
 
 func (ar *ArMsSql) Truncate() (numRowsDeleted int, err error) {
 	client := ar.Client()
-	tblName := client.NewScope(ar.Self()).TableName()
-	return -1, client.Exec("TRUNCATE TABLE " + tblName).Error
+	tblName := client.TableInfo(ar).Name
+	_, err = client.Exec("TRUNCATE TABLE " + tblName)
+	return -1, err
 }
 
-func (ar *ArMsSql) Find(id interface{}, out interface{}) error {
+func (ar *ArMsSql) Find(id interface{}, out interface{}) (err error) {
 	client := ar.Client()
-	return client.First(out, id).Error
+
+	_, errConv := strconv.Atoi(id.(string))
+
+	if errConv == nil {
+		_, err = client.Id(id).Get(out)
+	} else {
+		_, err = client.Select("cast(public_id as varchar(36)) as public_id, *").Where("public_id=?", id).Get(out)
+	}
+
+	return err
 }
 
-func (ar *ArMsSql) DbSave() error {
-	var err error
-
+func (ar *ArMsSql) DbSave() (err error) {
 	//if ar.UpdatedAt != nil {
 	//err = client.Save(ar.Self()).Error
 	////_, err = client.Put(ar.ModelName(), ar.ID, ar.Self())
 	//} else {
 	//_, err = client.PutIfAbsent(ar.ModelName(), ar.ID, ar.Self())
 	client := ar.Client()
-	err = client.Create(ar.Self()).Error
+
+	if ar.ID > 0 {
+		_, err = client.Id(ar.ID).Update(ar.Self())
+	} else {
+		_, err = client.Insert(ar.Self())
+	}
+
 	//}
 
 	return err
@@ -134,7 +150,8 @@ func (ar *ArMsSql) DbSave() error {
 
 func (ar *ArMsSql) DbDelete() (err error) {
 	client := ar.Client()
-	return client.Delete(ar.Self()).Error
+	_, err = client.Delete(ar.Self())
+	return
 }
 
 func (ar *ArMsSql) DbSearch(models interface{}) (err error) {
@@ -179,10 +196,12 @@ func (ar *ArMsSql) DbSearch(models interface{}) (err error) {
 func (ar *ArMsSql) SpExecResultSet(spName string, params map[string]interface{}, models interface{}) (err error) {
 	client := ar.Client()
 	if params == nil {
-		return client.Raw("exec " + spName).Scan(models).Error
+		models, err = client.Query("exec " + spName)
 	} else {
-		return client.Raw("exec " + spName + buildSpParams(params)).Scan(models).Error
+		models, err = client.Query("exec " + spName + buildSpParams(params))
 	}
+
+	return
 }
 
 func buildSpParams(params map[string]interface{}) string {
