@@ -48,12 +48,36 @@ func (model ActiveRecordAutomobile) ToActiveRecord() *ActiveRecordAutomobile {
 	return ToAR(&model).(*ActiveRecordAutomobile)
 }
 
+func (m *ActiveRecordAutomobile) DBConnectionEnvironment() string {
+	return "test" // NOTE: when using the goar package, this value should be pulled from ENV or config file
+}
+
+func (m *ActiveRecordAutomobile) DBConnectionName() string {
+	return "aws"
+}
+
 func (model ActiveRecordMotorcycle) ToActiveRecord() *ActiveRecordMotorcycle {
 	return ToAR(&model).(*ActiveRecordMotorcycle)
 }
 
+func (m *ActiveRecordMotorcycle) DBConnectionEnvironment() string {
+	return "test" // NOTE: when using the goar package, this value should be pulled from ENV or config file
+}
+
+func (m *ActiveRecordMotorcycle) DBConnectionName() string {
+	return "aws"
+}
+
 func (model CallbackErrorModel) ToActiveRecord() *CallbackErrorModel {
 	return ToAR(&model).(*CallbackErrorModel)
+}
+
+func (m *CallbackErrorModel) DBConnectionEnvironment() string {
+	return "test" // NOTE: when using the goar package, this value should be pulled from ENV or config file
+}
+
+func (m *CallbackErrorModel) DBConnectionName() string {
+	return "aws"
 }
 
 func (model *ActiveRecordAutomobile) DbSave() (err error) {

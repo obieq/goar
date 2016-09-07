@@ -1,5 +1,5 @@
 {
-	"ImportPath": ".",
+	"ImportPath": "github.com/obieq/goar",
 	"GoVersion": "go1.4.2",
 	"Deps": [
 		{
@@ -36,10 +36,6 @@
 		{
 			"ImportPath": "github.com/obieq/goar-validations",
 			"Rev": "aba3dc402a8fd7f92a431be938b723b9c08b82d6"
-		},
-		{
-			"ImportPath": "github.com/obieq/goar/tests/models",
-			"Rev": "3f5d47024480f5ccfd365677d2c7c718613d58e4"
 		},
 		{
 			"ImportPath": "github.com/onsi/ginkgo",
