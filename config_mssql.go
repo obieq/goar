@@ -9,6 +9,8 @@ import (
 type MSSQLConfig struct {
 	ConnectionName     string
 	Server             string
+	FailoverPartner    string
+	FailoverPort       int
 	Port               int
 	DBName             string
 	Username           string
@@ -24,8 +26,13 @@ func (c *config) loadMSSQL() {
 		path := c.Environment + "." + MSSQL + "." + connKey + "."
 		mssql := &MSSQLConfig{}
 		mssql.ConnectionName = connName
+
 		mssql.Server = gas.GetString(path + "server")
 		mssql.Port = gas.GetInt(path + "port")
+
+		mssql.FailoverPartner = gas.GetString(path + "failoverpartner")
+		mssql.FailoverPort = gas.GetInt(path + "failoverport")
+
 		mssql.DBName = gas.GetString(path + "dbname")
 		mssql.Username = gas.GetString(path + "username")
 		mssql.Password = gas.GetString(path + "password")

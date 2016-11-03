@@ -30,6 +30,8 @@ var (
 )
 
 func connect(connName string, env string) (client *xorm.Engine) {
+	var connString string
+
 	c := Config
 	if c == nil {
 		log.Panic("goar config cannot be nil")
@@ -41,7 +43,11 @@ func connect(connName string, env string) (client *xorm.Engine) {
 		log.Panic("mssql connection not found:", connKey)
 	}
 
-	connString := fmt.Sprintf("server=%s;port=%d;database=%s;user id=%s;password=%s", m.Server, m.Port, m.DBName, m.Username, m.Password)
+	if m.FailoverPartner != "" {
+		connString = fmt.Sprintf("server=%s;port=%d;database=%s;user id=%s;password=%s;failoverpartner=%s;failoverport=%d", m.Server, m.Port, m.DBName, m.Username, m.Password, m.FailoverPartner, m.FailoverPort)
+	} else {
+		connString = fmt.Sprintf("server=%s;port=%d;database=%s;user id=%s;password=%s", m.Server, m.Port, m.DBName, m.Username, m.Password)
+	}
 
 	if m.Debug {
 		log.Println("connString:", connString)
