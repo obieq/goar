@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/go-xorm/xorm"
@@ -15,7 +16,8 @@ import (
 
 type ArMsSql struct {
 	ActiveRecord `xorm:"-"`
-	ID           int `xorm:"pk autoincr 'id'"`
+	TZLocation   *time.Location `xorm:"-"`
+	ID           int            `xorm:"pk autoincr 'id'"`
 	//ID string `sql:"type:varchar(36)" gorm:"primary_key" json:"id,omitempty"`
 	Timestamps `xorm:"extends"`
 }
@@ -89,6 +91,11 @@ func (ar *ArMsSql) Client() *xorm.Engine {
 	conn, found := clients[connectionKey]
 	if !found {
 		conn = connect(self.DBConnectionName(), self.DBConnectionEnvironment())
+		conn.TZLocation = ar.TZLocation
+		if ar.TZLocation == nil {
+			conn.TZLocation = time.UTC
+		}
+
 		clients[connectionKey] = conn
 	}
 
